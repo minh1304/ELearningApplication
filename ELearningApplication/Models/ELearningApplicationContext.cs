@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ELearningApplication.StoredProcedure;
 
 namespace ELearningApplication.Models;
 
@@ -18,6 +18,8 @@ public partial class ELearningApplicationContext : DbContext
     public virtual DbSet<Course> Courses { get; set; }
 
     public virtual DbSet<Lesson> Lessons { get; set; }
+    // Khai báo một phương thức DbSet để thực hiện stored procedure
+    public DbSet<CourseDetails> CourseDetails { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
@@ -79,6 +81,12 @@ public partial class ELearningApplicationContext : DbContext
         });
 
         OnModelCreatingPartial(modelBuilder);
+        modelBuilder.Entity<CourseDetails>().HasNoKey().ToView(null);
+    }
+    public virtual async Task<List<CourseDetails>> GetCourseDetails(int courseId)
+    {
+        // Sử dụng phương thức FromSqlInterpolated để gọi stored procedure
+        return await CourseDetails.FromSqlInterpolated($"EXECUTE GetCourseDetails {courseId}").ToListAsync();
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
